@@ -75,7 +75,7 @@ void qrcode_clock::updateTime()
   QString timeStr(QString::number(time.toTime_t()));
 
   // encode time as QR code
-  QRcode *qrCodeMatrix(QRcode_encodeString8bit(timeStr.toStdString().c_str(), 0, QR_ECLEVEL_L));
+  QRcode *qrCodeMatrix(QRcode_encodeString8bit(timeStr.toStdString().c_str(), 0, QR_ECLEVEL_H));
 
   if (!qrCodeMatrix) {
       qDebug() << "kein QrCode erzeugt";
