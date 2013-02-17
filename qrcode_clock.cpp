@@ -17,7 +17,7 @@ qrcode_clock::qrcode_clock(QWidget *parent) :
   ui->setupUi(this);
 
   // go fullscreen
-//  setWindowState(windowState() ^ Qt::WindowFullScreen);
+  setWindowState(windowState() ^ Qt::WindowFullScreen);
 
   // hide cursor
   setCursor(Qt::BlankCursor);
@@ -27,6 +27,15 @@ qrcode_clock::qrcode_clock(QWidget *parent) :
   exitAct->setShortcut(Qt::Key_Escape);
   connect(exitAct, SIGNAL(triggered()), qApp, SLOT(quit()));
   addAction(exitAct);
+
+#ifdef QT_DEBUG
+  // pause resume clock with space.
+  // JUST FOR DEBUGGING, DEFEATS THE PURPOSE OF SHOWING ACCURATE TIME!!!
+  QAction *startStopAct = new QAction(this);
+  startStopAct->setShortcut(Qt::Key_Space);
+  connect(startStopAct, SIGNAL(triggered()), this, SLOT(startStop()));
+  addAction(startStopAct);
+#endif
 
   m_qrClock = findChild<QRLabel*>("clock");
   if (!m_qrClock) {
@@ -41,9 +50,9 @@ qrcode_clock::qrcode_clock(QWidget *parent) :
     }
 
   // start timer which encodes the time every second
-  QTimer *timer = new QTimer(this);
-  connect(timer, SIGNAL(timeout()), this, SLOT(updateTime()));
-  timer->start(1000);
+  m_timer = new QTimer(this);
+  connect(m_timer, SIGNAL(timeout()), this, SLOT(updateTime()));
+  m_timer->start(1000);
 
   // set background color to white
   QPalette pal = palette();
@@ -66,7 +75,12 @@ void qrcode_clock::updateTime()
   QString timeStr(QString::number(time.toTime_t()));
 
   // encode time as QR code
-  QRcode *qrCodeMatrix(QRcode_encodeString8bit(timeStr.toAscii(), 0, QR_ECLEVEL_L));
+  QRcode *qrCodeMatrix(QRcode_encodeString8bit(timeStr.toStdString().c_str(), 0, QR_ECLEVEL_L));
+
+  if (!qrCodeMatrix) {
+      qDebug() << "kein QrCode erzeugt";
+      return;
+    }
 
   // transfer QR code into picture
   m_qrImage = new QImage(qrCodeMatrix->width, qrCodeMatrix->width, QImage::Format_Mono);
@@ -86,3 +100,13 @@ void qrcode_clock::updateTime()
   // show human readable time
   m_humanClock->setText(time.toUTC().toString() + " UTC");
 }
+
+#ifdef QT_DEBUG
+void qrcode_clock::startStop()
+{
+  if (m_timer->isActive())
+    m_timer->stop();
+  else
+    m_timer->start();
+}
+#endif

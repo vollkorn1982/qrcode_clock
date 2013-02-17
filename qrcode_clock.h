@@ -22,7 +22,9 @@ public:
 
 private slots:
   void updateTime();
-//  void adjustClockSize(const QSize &size);
+#ifdef QT_DEBUG
+  void startStop();
+#endif
 
 private:
   Ui::qrcode_clock *ui;
@@ -30,6 +32,7 @@ private:
   QLabel           *m_humanClock;
   QImage           *m_qrImage;
   QSize             m_clockSize;
+  QTimer           *m_timer;
 };
 
 #endif // QRCODE_CLOCK_H
