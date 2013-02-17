@@ -86,7 +86,7 @@ void qrcode_clock::updateTime()
   m_qrImage = new QImage(qrCodeMatrix->width, qrCodeMatrix->width, QImage::Format_Mono);
   for (int i = 0; i < qrCodeMatrix->width; ++i) {
       for (int j = 0; j < qrCodeMatrix->width; ++j) {
-          m_qrImage->setPixel(i, j, qrCodeMatrix->data[i * qrCodeMatrix->width + j] & 1);
+          m_qrImage->setPixel(j, i, qrCodeMatrix->data[i * qrCodeMatrix->width + j] & 1);
         }
     }
 
